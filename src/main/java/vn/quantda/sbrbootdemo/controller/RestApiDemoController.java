@@ -1,6 +1,5 @@
 package vn.quantda.sbrbootdemo.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,12 +25,6 @@ public class RestApiDemoController {
 
   public RestApiDemoController(CoffeeRepository coffeeRepository) {
     this.coffeeRepository = coffeeRepository;
-    this.coffeeRepository.saveAll(List.of(
-        new Coffee("Cafe Cereza"),
-        new Coffee("Cafe Grenador"),
-        new Coffee("Cafe Lareno"),
-        new Coffee("Cafe Tres Ponta")
-    ));
   }
 
   @GetMapping
