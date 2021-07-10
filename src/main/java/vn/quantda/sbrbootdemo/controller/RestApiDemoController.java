@@ -15,61 +15,49 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import vn.quantda.sbrbootdemo.repository.CoffeeRepository;
+
 import vn.quantda.sbrbootdemo.domain.Coffee;
 
 @RestController
 @RequestMapping("/coffees")
 public class RestApiDemoController {
-    private List<Coffee> coffees = new ArrayList<>();
+  CoffeeRepository coffeeRepository;
 
-    public RestApiDemoController() {
-        coffees.addAll(List.of(
-            new Coffee("Cafe Cereza"),
-            new Coffee("Cafe Grenador"),
-            new Coffee("Cafe Lareno"),
-            new Coffee("Cafe Tres Ponta")
-        ));
-    }
+  public RestApiDemoController(CoffeeRepository coffeeRepository) {
+    this.coffeeRepository = coffeeRepository;
+    this.coffeeRepository.saveAll(List.of(
+        new Coffee("Cafe Cereza"),
+        new Coffee("Cafe Grenador"),
+        new Coffee("Cafe Lareno"),
+        new Coffee("Cafe Tres Ponta")
+    ));
+  }
 
-    @GetMapping
-    Iterable<Coffee> getCoffees() {
-        return coffees;
-    }
+  @GetMapping
+  Iterable<Coffee> getCoffees() {
+      return this.coffeeRepository.findAll();
+  }
 
-    @GetMapping("/{id}")
-    Optional<Coffee> getCoffeeById(@PathVariable String id) {
-        for (Coffee c : coffees) {
-            if (c.getId().equals(id)) {
-                return Optional.of(c);
-            }
-        }
-        return Optional.empty();
-    }
+  @GetMapping("/{id}")
+  Optional<Coffee> getCoffeeById(@PathVariable String id) {
+      return this.coffeeRepository.findById(id);
+  }
 
-    @PostMapping
-    Coffee postCoffee(@RequestBody Coffee coffee) {
-        coffees.add(coffee);
-        return coffee;
-    }
+  @PostMapping
+  Coffee postCoffee(@RequestBody Coffee coffee) {
+      return this.coffeeRepository.save(coffee);
+  }
 
-    @PutMapping("/{id}")
-    ResponseEntity<Coffee> putCoffee(@PathVariable String id, @RequestBody Coffee coffee) {
-        int coffeeIndex = -1;
+  @PutMapping("/{id}")
+  ResponseEntity<Coffee> putCoffee(@PathVariable String id, @RequestBody Coffee coffee) {
+    return (!coffeeRepository.existsById(id))
+      ? new ResponseEntity<>(coffeeRepository.save(coffee), HttpStatus.CREATED)
+      : new ResponseEntity<>(coffeeRepository.save(coffee), HttpStatus.OK);
+  }
 
-        for (Coffee c : coffees) {
-            if (c.getId().equals(id)) {
-                coffeeIndex = coffees.indexOf(c);
-                coffees.set(coffeeIndex, coffee);
-            }
-        }
-
-        return (coffeeIndex == -1)
-          ? new ResponseEntity<Coffee>(postCoffee(coffee), HttpStatus.CREATED)
-          : new ResponseEntity<Coffee>(coffee, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{id}")
-    void deleteCoffee(@PathVariable String id) {
-        coffees.removeIf(c -> c.getId().equals(id));
-    }
+  @DeleteMapping("/{id}")
+  void deleteCoffee(@PathVariable String id) {
+    coffeeRepository.deleteById(id);
+  }
 }
